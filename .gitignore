@@ -5,6 +5,10 @@ node_modules/
 
 # Cursor / local tooling
 .cursor/
+.claude/
+
+# Next.js SWC cache
+.swc/
 
 # Logs
 npm-debug.log*
