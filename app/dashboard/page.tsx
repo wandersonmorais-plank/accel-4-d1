@@ -1,12 +1,14 @@
 "use client"
 
 import { Button } from "@/components/Button"
+import { NavLinkButton } from "@/components/NavLinkButton"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Legend } from "@/components/Legend"
 import { Radio } from "@/components/Radio"
 import { SectionLabel } from "@/components/SectionLabel"
 import { Textarea } from "@/components/Textarea"
+import { PREVIEW_ANIMATION_CLASS } from "@/lib/preview-animation-classes"
 import type { AnimationChoice } from "@/lib/settings-context"
 import { useSettings } from "@/lib/settings-context"
 import { useCallback, useEffect, useState } from "react"
@@ -139,14 +141,6 @@ function ImplementationProgress({ font }: { font: string }) {
   )
 }
 
-const ANIMATION_CLASS: Record<AnimationChoice, string> = {
-  "fade-in": "animate-fade-in",
-  "slide-up": "animate-slide-up",
-  "slide-down": "animate-slide-down",
-  "scale-in": "animate-scale-in",
-  "blur-in": "animate-blur-in",
-}
-
 const ANIMATION_OPTIONS: { value: AnimationChoice; label: string }[] = [
   { value: "fade-in", label: "Fade in" },
   { value: "slide-up", label: "Slide up" },
@@ -173,15 +167,18 @@ export default function DashboardPage() {
     bumpPreview()
   }, [animation, title, description, bumpPreview])
 
-  const animClass = ANIMATION_CLASS[animation]
+  const animClass = PREVIEW_ANIMATION_CLASS[animation]
 
   return (
     <div className="min-h-dvh bg-background p-6 text-foreground">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-[360px_1fr]">
         <div className="space-y-6">
-          <header>
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Runtime-only settings (lost on reload).</p>
+          <header className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Runtime-only settings (lost on reload).</p>
+            </div>
+            <NavLinkButton href="/">Home</NavLinkButton>
           </header>
 
           <section className="space-y-6 rounded-xl border border-border bg-card p-5 text-card-foreground">
