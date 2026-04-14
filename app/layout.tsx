@@ -4,7 +4,7 @@ import "./globals.css"
 import { Providers } from "./providers"
 
 export const metadata: Metadata = {
-  title: "accel-4-d1",
+  title: "Welcome to Wand's accel project",
   description: "Next.js + Tailwind + shadcn/ui + React Query",
 }
 
