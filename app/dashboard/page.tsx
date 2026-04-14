@@ -1,5 +1,6 @@
 "use client"
 
+import { Button } from "@/components/Button"
 import type { AnimationChoice } from "@/lib/settings-context"
 import { useSettings } from "@/lib/settings-context"
 import { useCallback, useEffect, useState } from "react"
@@ -181,24 +182,12 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <span className="text-sm font-medium">Theme</span>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTheme("light")}
-                  className={`rounded-md border px-3 py-2 text-sm ${
-                    theme === "light" ? "border-primary bg-secondary" : "border-border bg-background"
-                  }`}
-                >
+                <Button variant="toggle" pressed={theme === "light"} onClick={() => setTheme("light")}>
                   light
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("dark")}
-                  className={`rounded-md border px-3 py-2 text-sm ${
-                    theme === "dark" ? "border-primary bg-secondary" : "border-border bg-background"
-                  }`}
-                >
+                </Button>
+                <Button variant="toggle" pressed={theme === "dark"} onClick={() => setTheme("dark")}>
                   dark
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -257,16 +246,14 @@ export default function DashboardPage() {
               <span className="text-sm font-medium">Animation</span>
               <div className="flex flex-wrap gap-2">
                 {ANIMATION_OPTIONS.map((opt) => (
-                  <button
+                  <Button
                     key={opt.value}
-                    type="button"
+                    variant="toggle"
+                    pressed={animation === opt.value}
                     onClick={() => setAnimation(opt.value)}
-                    className={`rounded-md border px-3 py-2 text-sm ${
-                      animation === opt.value ? "border-primary bg-secondary" : "border-border bg-background"
-                    }`}
                   >
                     {opt.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -293,13 +280,9 @@ export default function DashboardPage() {
                 <span>Animation: {animation}</span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={bumpPreview}
-              className="mt-4 rounded-md border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
+            <Button variant="secondary" className="mt-4" onClick={bumpPreview}>
               Replay animation
-            </button>
+            </Button>
           </div>
         </div>
       </div>
