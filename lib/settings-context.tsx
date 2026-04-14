@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo, useState } from "react"
 
 export type Theme = "light" | "dark"
 export type FontChoice = "inter" | "playfair" | "space-grotesk"
-export type AnimationChoice = "fade-in" | "slide-up"
+export type AnimationChoice = "fade-in" | "slide-up" | "slide-down" | "scale-in" | "blur-in"
 
 export interface Settings {
   theme: Theme

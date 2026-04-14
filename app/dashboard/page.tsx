@@ -1,7 +1,8 @@
 "use client"
 
+import type { AnimationChoice } from "@/lib/settings-context"
 import { useSettings } from "@/lib/settings-context"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type StepId = "1" | "2" | "3" | "4" | "5"
 
@@ -9,6 +10,22 @@ interface StepCheck {
   id: StepId
   label: string
   done: boolean
+}
+
+function animationNameMatches(computed: string, needle: string) {
+  if (computed === needle) return true
+  if (computed.includes(needle)) return true
+  return computed.split(", ").some((s) => s.includes(needle))
+}
+
+function probeAnimationUtility(className: string) {
+  const el = document.createElement("div")
+  el.className = className
+  el.style.cssText = "position:absolute;left:-9999px;top:0;pointer-events:none"
+  document.body.appendChild(el)
+  const name = getComputedStyle(el).animationName
+  document.body.removeChild(el)
+  return name
 }
 
 function useImplementationSteps(font: string): StepCheck[] {
@@ -28,26 +45,17 @@ function useImplementationSteps(font: string): StepCheck[] {
       const fontInterVar = getComputedStyle(root).getPropertyValue("--font-inter").trim()
       const fontActiveInline = root.style.getPropertyValue("--font-active").trim()
 
-      const probeFade = document.createElement("div")
-      probeFade.className = "animate-fade-in"
-      probeFade.style.cssText = "position:absolute;left:-9999px;top:0;pointer-events:none"
-      document.body.appendChild(probeFade)
-      const fadeAnim = getComputedStyle(probeFade).animationName
-      document.body.removeChild(probeFade)
+      const animationChecks = [
+        { cls: "animate-fade-in", needle: "fadeIn" },
+        { cls: "animate-slide-up", needle: "slideUp" },
+        { cls: "animate-slide-down", needle: "slideDown" },
+        { cls: "animate-scale-in", needle: "scaleIn" },
+        { cls: "animate-blur-in", needle: "blurIn" },
+      ] as const
 
-      const probeSlide = document.createElement("div")
-      probeSlide.className = "animate-slide-up"
-      probeSlide.style.cssText = "position:absolute;left:-9999px;top:0;pointer-events:none"
-      document.body.appendChild(probeSlide)
-      const slideAnim = getComputedStyle(probeSlide).animationName
-      document.body.removeChild(probeSlide)
-
-      const fadeOk =
-        fadeAnim === "fadeIn" || fadeAnim.includes("fadeIn") || fadeAnim.split(", ").some((s) => s.includes("fadeIn"))
-      const slideOk =
-        slideAnim === "slideUp" ||
-        slideAnim.includes("slideUp") ||
-        slideAnim.split(", ").some((s) => s.includes("slideUp"))
+      const animationsOk = animationChecks.every(({ cls, needle }) =>
+        animationNameMatches(probeAnimationUtility(cls), needle),
+      )
 
       const path = typeof window !== "undefined" ? window.location.pathname : ""
 
@@ -72,7 +80,7 @@ function useImplementationSteps(font: string): StepCheck[] {
         {
           id: "4",
           label: "Step 4 — Body font + animations (`app/globals.css`)",
-          done: fadeOk && slideOk,
+          done: animationsOk,
         },
         {
           id: "5",
@@ -124,21 +132,41 @@ function ImplementationProgress({ font }: { font: string }) {
   )
 }
 
+const ANIMATION_CLASS: Record<AnimationChoice, string> = {
+  "fade-in": "animate-fade-in",
+  "slide-up": "animate-slide-up",
+  "slide-down": "animate-slide-down",
+  "scale-in": "animate-scale-in",
+  "blur-in": "animate-blur-in",
+}
+
+const ANIMATION_OPTIONS: { value: AnimationChoice; label: string }[] = [
+  { value: "fade-in", label: "Fade in" },
+  { value: "slide-up", label: "Slide up" },
+  { value: "slide-down", label: "Slide down" },
+  { value: "scale-in", label: "Scale in" },
+  { value: "blur-in", label: "Blur in" },
+]
+
 export default function DashboardPage() {
   const { theme, title, description, font, animation, setTheme, setTitle, setDescription, setFont, setAnimation } =
     useSettings()
 
   const [animKey, setAnimKey] = useState(0)
 
-  useEffect(() => {
-    setAnimKey((k) => k + 1)
-  }, [animation, title, description])
+  const bumpPreview = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setAnimKey((k) => k + 1)
+      })
+    })
+  }, [])
 
-  const animClass =
-    {
-      "fade-in": "animate-fade-in",
-      "slide-up": "animate-slide-up",
-    }[animation]
+  useEffect(() => {
+    bumpPreview()
+  }, [animation, title, description, bumpPreview])
+
+  const animClass = ANIMATION_CLASS[animation]
 
   return (
     <div className="min-h-dvh bg-background p-6 text-foreground">
@@ -227,25 +255,19 @@ export default function DashboardPage() {
 
             <div className="space-y-2">
               <span className="text-sm font-medium">Animation</span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAnimation("fade-in")}
-                  className={`rounded-md border px-3 py-2 text-sm ${
-                    animation === "fade-in" ? "border-primary bg-secondary" : "border-border bg-background"
-                  }`}
-                >
-                  fade-in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAnimation("slide-up")}
-                  className={`rounded-md border px-3 py-2 text-sm ${
-                    animation === "slide-up" ? "border-primary bg-secondary" : "border-border bg-background"
-                  }`}
-                >
-                  slide-up
-                </button>
+              <div className="flex flex-wrap gap-2">
+                {ANIMATION_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setAnimation(opt.value)}
+                    className={`rounded-md border px-3 py-2 text-sm ${
+                      animation === opt.value ? "border-primary bg-secondary" : "border-border bg-background"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           </section>
@@ -256,12 +278,13 @@ export default function DashboardPage() {
 
           <div>
             <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Live preview</h2>
-            <div
-              key={animKey}
-              className={`${animClass} rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm`}
-            >
-              <h1 className="text-3xl font-bold">{title}</h1>
-              <p className="mt-2 text-muted-foreground">{description}</p>
+            <div className="rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm">
+              <div key={animKey}>
+                <h1 className={`text-3xl font-bold ${animClass} motion-reduce:animate-none`}>{title}</h1>
+                <p className={`mt-2 text-muted-foreground ${animClass} motion-reduce:animate-none`}>
+                  {description}
+                </p>
+              </div>
               <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
                 <span>Font: {font}</span>
                 <span aria-hidden>·</span>
@@ -272,8 +295,8 @@ export default function DashboardPage() {
             </div>
             <button
               type="button"
-              onClick={() => setAnimKey((k) => k + 1)}
-              className="mt-4 rounded-md border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
+              onClick={bumpPreview}
+              className="mt-4 rounded-md border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Replay animation
             </button>
