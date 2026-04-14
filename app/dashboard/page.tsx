@@ -1,6 +1,12 @@
 "use client"
 
 import { Button } from "@/components/Button"
+import { Input } from "@/components/Input"
+import { Label } from "@/components/Label"
+import { Legend } from "@/components/Legend"
+import { Radio } from "@/components/Radio"
+import { SectionLabel } from "@/components/SectionLabel"
+import { Textarea } from "@/components/Textarea"
 import type { AnimationChoice } from "@/lib/settings-context"
 import { useSettings } from "@/lib/settings-context"
 import { useCallback, useEffect, useState } from "react"
@@ -180,7 +186,7 @@ export default function DashboardPage() {
 
           <section className="space-y-6 rounded-xl border border-border bg-card p-5 text-card-foreground">
             <div className="space-y-2">
-              <span className="text-sm font-medium">Theme</span>
+              <SectionLabel>Theme</SectionLabel>
               <div className="flex gap-2">
                 <Button variant="toggle" pressed={theme === "light"} onClick={() => setTheme("light")}>
                   light
@@ -192,33 +198,17 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="dash-title" className="text-sm font-medium">
-                Title
-              </label>
-              <input
-                id="dash-title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
+              <Label htmlFor="dash-title">Title</Label>
+              <Input id="dash-title" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="dash-desc" className="text-sm font-medium">
-                Description
-              </label>
-              <textarea
-                id="dash-desc"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
+              <Label htmlFor="dash-desc">Description</Label>
+              <Textarea id="dash-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} />
             </div>
 
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Font</legend>
+              <Legend>Font</Legend>
               <div className="flex flex-col gap-2">
                 {(
                   [
@@ -227,23 +217,22 @@ export default function DashboardPage() {
                     { value: "space-grotesk" as const, label: "Space Grotesk" },
                   ] as const
                 ).map((opt) => (
-                  <label key={opt.value} className="flex cursor-pointer items-center gap-2 text-sm">
-                    <input
-                      type="radio"
+                  <Label key={opt.value} variant="inline" htmlFor={`font-${opt.value}`}>
+                    <Radio
+                      id={`font-${opt.value}`}
                       name="font"
                       value={opt.value}
                       checked={font === opt.value}
                       onChange={() => setFont(opt.value)}
-                      className="h-4 w-4 accent-primary"
                     />
                     <span>{opt.label}</span>
-                  </label>
+                  </Label>
                 ))}
               </div>
             </fieldset>
 
             <div className="space-y-2">
-              <span className="text-sm font-medium">Animation</span>
+              <SectionLabel>Animation</SectionLabel>
               <div className="flex flex-wrap gap-2">
                 {ANIMATION_OPTIONS.map((opt) => (
                   <Button
