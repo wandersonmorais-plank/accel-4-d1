@@ -1,0 +1,21 @@
+.next/
+node_modules/
+
+.DS_Store
+
+# Cursor / local tooling
+.cursor/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.*.local
+
+# Prefer pnpm lockfile only
+package-lock.json
+
