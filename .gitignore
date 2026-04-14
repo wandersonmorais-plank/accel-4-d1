@@ -23,3 +23,6 @@ yarn-error.log*
 # Prefer pnpm lockfile only
 package-lock.json
 
+# TypeScript
+*.tsbuildinfo
+
