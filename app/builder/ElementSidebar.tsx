@@ -1,6 +1,7 @@
 "use client"
 
 import { useDraggable } from "@dnd-kit/core"
+import { useRef } from "react"
 import { AlignLeft, ImageIcon, Square } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/Button"
@@ -46,36 +47,63 @@ function SidebarElementCard({
   icon: Icon,
 }: (typeof ELEMENT_CARDS)[number]) {
   const { addElement } = useBuilderContext()
+  const pointerOrigin = useRef<{ x: number; y: number } | null>(null)
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `sidebar-${type}`,
     data: { source: "sidebar", elementType: type } satisfies SidebarDragData,
   })
 
   const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        opacity: isDragging ? 0 : 1,
+      }
     : undefined
 
+  const tryAddFromTap = (clientX: number, clientY: number) => {
+    const origin = pointerOrigin.current
+    pointerOrigin.current = null
+    if (!origin) return
+    const dx = clientX - origin.x
+    const dy = clientY - origin.y
+    if (Math.hypot(dx, dy) < 8) addElement(type)
+  }
+
   return (
-    <button
-      type="button"
+    <div
       ref={setNodeRef}
       style={style}
       className={cn(
         "flex w-full flex-col items-start gap-2 rounded-md border border-border bg-card p-3 text-left text-card-foreground transition-[box-shadow,opacity]",
         "hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        isDragging && "z-10 cursor-grabbing opacity-70 shadow-md",
+        isDragging && "cursor-grabbing",
         !isDragging && "cursor-grab",
       )}
+      aria-label={`Add ${label} element`}
       {...listeners}
       {...attributes}
-      onClick={() => addElement(type)}
+      onPointerDown={(e) => {
+        pointerOrigin.current = { x: e.clientX, y: e.clientY }
+      }}
+      onPointerUp={(e) => {
+        tryAddFromTap(e.clientX, e.clientY)
+      }}
+      onPointerCancel={() => {
+        pointerOrigin.current = null
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          addElement(type)
+        }
+      }}
     >
       <Icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
       <div className="min-w-0">
         <div className="text-sm font-medium">{label}</div>
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
-    </button>
+    </div>
   )
 }
 
