@@ -15,6 +15,15 @@ const OVERLAY_LABELS: Record<ElementType, string> = {
   carousel: "Carousel",
 }
 
+function isSidebarDragData(value: unknown): value is SidebarDragData {
+  if (typeof value !== "object" || value === null) return false
+  const v = value as { source?: unknown; elementType?: unknown }
+  return (
+    v.source === "sidebar" &&
+    (v.elementType === "text" || v.elementType === "button" || v.elementType === "carousel")
+  )
+}
+
 function BuilderLayout() {
   const { isPreview } = useBuilderContext()
   const [activeSidebarType, setActiveSidebarType] = useState<ElementType | null>(null)
@@ -28,8 +37,9 @@ function BuilderLayout() {
     <DndContext
       sensors={sensors}
       onDragStart={(event) => {
-        const data = event.active.data.current as SidebarDragData | undefined
-        if (data?.source === "sidebar") setActiveSidebarType(data.elementType)
+        if (isSidebarDragData(event.active.data.current)) {
+          setActiveSidebarType(event.active.data.current.elementType)
+        }
       }}
       onDragEnd={() => setActiveSidebarType(null)}
       onDragCancel={() => setActiveSidebarType(null)}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useDraggable } from "@dnd-kit/core"
-import { useRef } from "react"
+import { useRef, type HTMLAttributes } from "react"
 import { AlignLeft, ImageIcon, Square } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/Button"
@@ -53,12 +53,18 @@ function SidebarElementCard({
     data: { source: "sidebar", elementType: type } satisfies SidebarDragData,
   })
 
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0 : 1,
-      }
-    : undefined
+  const allListeners = { ...(listeners ?? {}) } as HTMLAttributes<HTMLDivElement>
+  const { onPointerDown: dndPointerDown, ...restListeners } = allListeners
+
+  const style =
+    transform != null
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          opacity: isDragging ? 0 : 1,
+        }
+      : isDragging
+        ? { opacity: 0 }
+        : undefined
 
   const tryAddFromTap = (clientX: number, clientY: number) => {
     const origin = pointerOrigin.current
@@ -80,10 +86,11 @@ function SidebarElementCard({
         !isDragging && "cursor-grab",
       )}
       aria-label={`Add ${label} element`}
-      {...listeners}
+      {...restListeners}
       {...attributes}
       onPointerDown={(e) => {
         pointerOrigin.current = { x: e.clientX, y: e.clientY }
+        dndPointerDown?.(e)
       }}
       onPointerUp={(e) => {
         tryAddFromTap(e.clientX, e.clientY)
