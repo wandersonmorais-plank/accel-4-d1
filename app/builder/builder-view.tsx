@@ -1,6 +1,7 @@
 "use client"
 
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useState } from "react"
 import { useBuilderContext } from "@/lib/builder-context"
 import type { ElementType } from "@/lib/builder-types"
@@ -25,11 +26,14 @@ function isSidebarDragData(value: unknown): value is SidebarDragData {
 }
 
 function BuilderLayout() {
-  const { isPreview } = useBuilderContext()
-  const [activeSidebarType, setActiveSidebarType] = useState<ElementType | null>(null)
+  const { isPreview, elements, addElement, reorderElements } = useBuilderContext()
+  const [activeType, setActiveType] = useState<ElementType | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
 
@@ -38,11 +42,24 @@ function BuilderLayout() {
       sensors={sensors}
       onDragStart={(event) => {
         if (isSidebarDragData(event.active.data.current)) {
-          setActiveSidebarType(event.active.data.current.elementType)
+          setActiveType(event.active.data.current.elementType)
+        } else {
+          const el = elements.find((e) => e.id === event.active.id)
+          setActiveType(el?.type ?? null)
         }
       }}
-      onDragEnd={() => setActiveSidebarType(null)}
-      onDragCancel={() => setActiveSidebarType(null)}
+      onDragEnd={(event) => {
+        const { active, over } = event
+        if (isSidebarDragData(active.data.current)) {
+          if (over) {
+            addElement(active.data.current.elementType)
+          }
+        } else if (over && active.id !== over.id) {
+          reorderElements(String(active.id), String(over.id))
+        }
+        setActiveType(null)
+      }}
+      onDragCancel={() => setActiveType(null)}
     >
       <div className="flex h-screen w-full overflow-hidden">
         <ElementSidebar className={cn(isPreview && "hidden")} />
@@ -50,9 +67,9 @@ function BuilderLayout() {
         <PropertyPanel className={cn(isPreview && "hidden")} />
       </div>
       <DragOverlay dropAnimation={null}>
-        {activeSidebarType ? (
+        {activeType ? (
           <div className="flex w-56 flex-col gap-1 rounded-md border border-border bg-card p-3 text-left text-card-foreground shadow-lg">
-            <div className="text-sm font-medium">{OVERLAY_LABELS[activeSidebarType]}</div>
+            <div className="text-sm font-medium">{OVERLAY_LABELS[activeType]}</div>
             <div className="text-xs text-muted-foreground">Drop on canvas to place</div>
           </div>
         ) : null}
