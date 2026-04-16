@@ -40,8 +40,16 @@ export interface BuilderState {
 }
 
 export interface BuilderContextValue extends BuilderState {
-  setSelectedId: (id: string | null) => void
-  setPalette: (palette: PaletteKey) => void
-  setBackgroundImageObjectUrl: (url: string | null) => void
-  setIsPreview: (isPreview: boolean) => void
+  addElement: (type: ElementType) => void
+  removeElement: (id: string) => void
+  updateElement: (
+    id: string,
+    patch: Partial<TextProps> | Partial<ButtonElementProps> | Partial<CarouselProps>,
+  ) => void
+  reorderElements: (activeId: string, overId: string) => void
+  selectElement: (id: string | null) => void
+  setBackgroundImage: (url: string | null) => void
+  setPalette: (key: PaletteKey) => void
+  togglePreviewMode: () => void
+  clearCanvas: () => void
 }

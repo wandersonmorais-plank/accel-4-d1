@@ -3,6 +3,7 @@
 // Providers — client boundary for React Query
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
+import { BuilderProvider, useBuilderContext } from "@/lib/builder-context"
 import { SettingsProvider, useSettings } from "@/lib/settings-context"
 
 function GlobalSettingsApplier() {
@@ -24,15 +25,33 @@ function GlobalSettingsApplier() {
   return null
 }
 
+const PALETTE_CLASSES = ["palette-rose", "palette-violet", "palette-emerald", "palette-amber"] as const
+
+function GlobalBuilderApplier() {
+  const { palette } = useBuilderContext()
+
+  useEffect(() => {
+    const root = document.documentElement
+    PALETTE_CLASSES.forEach((cls) => root.classList.remove(cls))
+    if (palette !== "default") {
+      root.classList.add(`palette-${palette}`)
+    }
+  }, [palette])
+
+  return null
+}
+
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient())
   return (
     <QueryClientProvider client={queryClient}>
       <SettingsProvider>
         <GlobalSettingsApplier />
-        {children}
+        <BuilderProvider>
+          <GlobalBuilderApplier />
+          {children}
+        </BuilderProvider>
       </SettingsProvider>
     </QueryClientProvider>
   )
 }
-
