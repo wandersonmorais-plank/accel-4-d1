@@ -1,7 +1,7 @@
 "use client"
 
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
-import { BuilderProvider, useBuilderContext } from "@/lib/builder-context"
+import { useBuilderContext } from "@/lib/builder-context"
 import { cn } from "@/lib/utils"
 import CanvasPanel from "./CanvasPanel"
 import ElementSidebar from "./ElementSidebar"
@@ -23,9 +23,5 @@ function BuilderLayout() {
 }
 
 export default function BuilderView() {
-  return (
-    <BuilderProvider>
-      <BuilderLayout />
-    </BuilderProvider>
-  )
+  return <BuilderLayout />
 }
