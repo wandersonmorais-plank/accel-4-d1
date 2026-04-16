@@ -40,21 +40,9 @@ export default function SortableElement({ element }: { element: CanvasElement })
       className={cn("touch-none", isDragging && "opacity-80")}
     >
       <div
-        role="button"
-        tabIndex={0}
-        onClick={(e) => {
-          e.stopPropagation()
-          selectElement(element.id)
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            selectElement(element.id)
-          }
-        }}
         className={cn(
-          "flex min-h-[4rem] cursor-pointer items-stretch gap-2 rounded-md border border-border bg-card p-2 text-left outline-none",
-          "hover:bg-accent/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "flex min-h-[4rem] items-stretch gap-2 rounded-md border border-border bg-card p-2 text-left outline-none",
+          "hover:bg-accent/30 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
           selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
         )}
       >
@@ -68,10 +56,18 @@ export default function SortableElement({ element }: { element: CanvasElement })
         >
           <GripVertical className="h-4 w-4" aria-hidden />
         </button>
-        <div className="min-w-0 flex-1 self-center">
+        <button
+          type="button"
+          className="min-w-0 flex-1 self-center rounded px-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label={`Select ${element.type} element`}
+          onClick={(e) => {
+            e.stopPropagation()
+            selectElement(element.id)
+          }}
+        >
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{element.type}</div>
           <div className="truncate text-sm text-foreground">{elementSummary(element)}</div>
-        </div>
+        </button>
       </div>
     </div>
   )

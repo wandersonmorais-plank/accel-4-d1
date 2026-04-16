@@ -30,9 +30,10 @@ export default function CanvasPanel() {
           isOver && "bg-primary/5",
         )}
         onClick={(e) => {
-          const target = e.target as HTMLElement | null
-          if (!target) return
-          if (!target.closest("[data-canvas-element]")) selectElement(null)
+          const node = e.target
+          if (!(node instanceof Node)) return
+          const el = node instanceof Element ? node : node.parentElement
+          if (!el?.closest("[data-canvas-element]")) selectElement(null)
         }}
       >
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
