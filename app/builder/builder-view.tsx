@@ -9,7 +9,11 @@ import PropertyPanel from "./PropertyPanel"
 
 function BuilderLayout() {
   const { isPreview } = useBuilderContext()
-  const sensors = useSensors(useSensor(PointerSensor))
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  )
 
   return (
     <DndContext sensors={sensors}>
