@@ -4,6 +4,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { SettingsProvider, useSettings } from "@/lib/settings-context"
+import { BuilderProvider, useBuilder } from "@/lib/builder-context"
 
 function GlobalSettingsApplier() {
   const { theme, font } = useSettings()
@@ -24,13 +25,32 @@ function GlobalSettingsApplier() {
   return null
 }
 
+const PALETTE_CLASSES = ["palette-rose", "palette-violet", "palette-emerald", "palette-amber"] as const
+
+function GlobalBuilderApplier() {
+  const { palette } = useBuilder()
+
+  useEffect(() => {
+    const root = document.documentElement
+    PALETTE_CLASSES.forEach((cls) => root.classList.remove(cls))
+    if (palette !== "default") {
+      root.classList.add(`palette-${palette}`)
+    }
+  }, [palette])
+
+  return null
+}
+
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient())
   return (
     <QueryClientProvider client={queryClient}>
       <SettingsProvider>
         <GlobalSettingsApplier />
-        {children}
+        <BuilderProvider>
+          <GlobalBuilderApplier />
+          {children}
+        </BuilderProvider>
       </SettingsProvider>
     </QueryClientProvider>
   )
